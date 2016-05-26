@@ -27,7 +27,7 @@ from core import *
 def myBuildPathNetwork(pathnodes, world, agent = None):
 	lines = []
 	### YOUR CODE GOES BELOW HERE ###
-
+	
 	#getting world dimensions
 	x,y = world.getDimensions()
 	dimensions = (int(math.ceil(x/cellsize)), int(math.ceil(y/cellsize)))
@@ -37,6 +37,5 @@ def myBuildPathNetwork(pathnodes, world, agent = None):
 	for node in pathnodes:
 		for nextNode in pathnodes(node, len(pathnodes)):
 			tryLine = (node, nextNode)
-
 	### YOUR CODE GOES ABOVE HERE ###
 	return lines

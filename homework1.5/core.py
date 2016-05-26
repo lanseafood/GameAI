@@ -55,6 +55,7 @@ class Mover(pygame.sprite.Sprite, Thing):
 	### originalImage: the image un-rotated
 	### orientation: direction agent is facing in degrees (0 = to the right)
 	### speed: how fast the agent moves (horizontal, vertical)
+	### maxradius: the worst-case scenario for the bounding circle, accounting for rotation changing the dimensions of the agent's bounding box.
 	### radius: the bounding circle (max(width, height))
 	### world: the world
 	### owner: the thing that created me
@@ -66,21 +67,29 @@ class Mover(pygame.sprite.Sprite, Thing):
 		self.originalImage = self.image.copy()
 		self.orientation = orientation
 		self.world = world
-		self.speed = speed 
-		self.radius = distance(self.rect.topleft, self.rect.bottomright)/2.0 #max(self.rect.width, self.rect.height)/2.0
+		self.speed = speed
+		self.maxradius = pow(pow(self.getRadius() * 2, 2) * 2, 0.5) / 2
 		## Translate to initial position
-		self.rect = self.rect.move(position)
+		self.position = (0.0, 0.0)
+		self.move(position)
 		self.turnToAngle(orientation)
 		self.owner = None
 		self.alive = True
 		
 	def getRadius(self):
-		return self.radius
-		
+		return distance(self.rect.topleft, self.rect.bottomright)/2.0
+
+	# Gets the worst-case scenario for the object's radius, accounting for all rotations.
+	def getMaxRadius(self):
+		return self.maxradius
+
+	def move(self, offset):
+		self.position = tuple(map(lambda x, y: x + y, self.position, offset))
+		self.rect.center = self.position
 	
 	### Tells the agent to face a point
 	def turnToFace(self, pos):
-#		direction = [m - n for m,n in zip(pos,self.rect.center)]
+#		direction = [m - n for m,n in zip(pos,self.position)]
 		direction = (pos[0] - self.getLocation()[0], pos[1] - self.getLocation()[1])
 		angle = math.degrees(numpy.arctan2(direction[0],direction[1]))-90
 		self.turnToAngle(angle)
@@ -93,7 +102,7 @@ class Mover(pygame.sprite.Sprite, Thing):
 		self.orientation = angle
 		rot_img = pygame.transform.rotate(self.originalImage, self.orientation)
 		img_rect = rot_img.get_rect()
-		img_rect.center = self.rect.center
+		img_rect.center = self.position
 		self.image = rot_img
 		self.rect = img_rect
 	
@@ -110,7 +119,7 @@ class Mover(pygame.sprite.Sprite, Thing):
 		
 	# Get the object's (x, y) location
 	def getLocation(self):
-		return self.rect.center
+		return self.position
 		
 	def getOrientation(self):
 		return self.orientation
@@ -179,7 +188,7 @@ class Bullet(Mover):
 		normalizedDirection = (math.cos(rad), -math.sin(rad))
 		next = [m*n for m,n in zip(normalizedDirection,self.speed)]
 		self.distanceTraveled = self.distanceTraveled + distance((0,0), next)
-		self.rect = self.rect.move(next)
+		self.move(next)
 		return None
 
 	def collision(self, thing):
@@ -193,7 +202,7 @@ class Bullet(Mover):
 		if thing != self.owner and isinstance(thing, Agent) and (thing.getTeam() == None or thing.getTeam() != self.owner.getTeam()):
 			thing.damage(self.damage)
 			return True
-		elif isinstance(thing, Obstacle) or isinstance(thing, Gate) or self.rect.center[0] < 0 or self.rect.center[0] > self.world.dimensions[0] or self.rect.center[1] < 0 or self.rect.center[1] > self.world.dimensions[1]:
+		elif isinstance(thing, Obstacle) or isinstance(thing, Gate) or self.position[0] < 0 or self.position[0] > self.world.dimensions[0] or self.position[1] < 0 or self.position[1] > self.world.dimensions[1]:
 			return True
 		else:
 			return False
@@ -239,7 +248,7 @@ class Agent(Mover):
 		Mover.update(self, delta)
 		if self.moveTarget is not None:
 			drawCross(self.world.background, self.moveTarget, (0, 0, 0), 5)
-			direction = [m - n for m,n in zip(self.moveTarget,self.rect.center)]
+			direction = [m - n for m,n in zip(self.moveTarget,self.position)]
 			# Figure out distance to moveTarget
 #			mag = reduce(lambda x, y: (x**2)+(y**2), direction)**0.5 
 			mag = distance(self.getLocation(), self.moveTarget)
@@ -255,7 +264,7 @@ class Agent(Mover):
 				normalizedDirection = [x/mag for x in direction]
 				next = [m*n for m,n in zip(normalizedDirection,self.speed)]
 				self.distanceTraveled = self.distanceTraveled + distance((0,0), next)
-				self.rect = self.rect.move(next)
+				self.move(next)
 				self.navigator.update(delta)
 				# Check for shortcut
 				if self.navigator != None:
@@ -286,7 +295,7 @@ class Agent(Mover):
 	### MoveToTarget tells the agent where to go and starts movement
 	def moveToTarget(self, pos):
 		self.moveTarget = pos
-		self.moveOrigin = self.rect.center
+		self.moveOrigin = self.position
 		self.turnToFace(pos)
 	
 
@@ -297,12 +306,12 @@ class Agent(Mover):
 
 	def navigateTo(self, pos):
 		if self.navigator != None:
-			self.navigator.computePath(self.rect.center, pos)
+			self.navigator.computePath(self.position, pos)
 
 	### Shoot the gun. Return the bullet that was spawned, or None.
 	def shoot(self):
 		if self.canfire:
-			bullet = self.bulletclass(self.rect.center, self.orientation, self.world)
+			bullet = self.bulletclass(self.position, self.orientation, self.world)
 			bullet.setOwner(self)
 			self.world.addBullet(bullet)
 			self.canfire = False
@@ -401,7 +410,7 @@ class Gatherer(Agent):
 	def doneMoving(self):
 		if len(self.targets) > 0:
 			current = self.targets[0]
-			if distance(self.rect.center, current) < self.radius/2.0:
+			if distance(self.position, current) < self.getRadius()/2.0:
 				# close enough, go to the next target
 				self.targets.pop(0)
 				if len(self.targets) > 0:
@@ -981,8 +990,8 @@ class GameWorld():
 				
 	def doMouseUp(self):
 		pos = pygame.mouse.get_pos()
-		offsetX = pos[0] + self.agent.rect.center[0] - self.camera[0]
-		offsetY = pos[1] + self.agent.rect.center[1] - self.camera[1]
+		offsetX = pos[0] + self.agent.position[0] - self.camera[0]
+		offsetY = pos[1] + self.agent.position[1] - self.camera[1]
 		self.agent.navigateTo([offsetX, offsetY])
 		
 
@@ -997,7 +1006,7 @@ class GameWorld():
 		for m1 in self.movers:
 			if m1 in self.movers:
 				# Collision against world boundaries
-				if m1.rect.center[0] < 0 or m1.rect.center[0] > self.dimensions[0] or m1.rect.center[1] < 0 or m1.rect.center[1] > self.dimensions[1]:
+				if m1.position[0] < 0 or m1.position[0] > self.dimensions[0] or m1.position[1] < 0 or m1.position[1] > self.dimensions[1]:
 					collisions.append((m1, self))
 				# Collision against obstacles
 				for o in self.obstacles:

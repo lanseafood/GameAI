@@ -1,7 +1,7 @@
 '''
  * Copyright (c) 2014, 2015 Entertainment Intelligence Lab, Georgia Institute of Technology.
  * Originally developed by Mark Riedl.
- * Last edited by Mark Riedl 05/2015
+ * Last edited by Matthew Guzdial 01/2016
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,4 +58,5 @@ FIRERATE = 10
 DODGERATE = 10
 
 INFINITY = float("inf")
+EPSILON = 0.000001
 

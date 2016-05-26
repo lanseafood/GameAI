@@ -121,10 +121,18 @@ def calculateIntersectPoint(p1, p2, p3, p4):
 	p = getIntersectPoint(p1, p2, p3, p4)
 	if p is not None:
 		p = p[0]
-		if p[0] >= min(p1[0], p2[0]) and p[0] <= max(p1[0], p2[0]) and p[1] >= min(p1[1], p2[1]) and p[1] <= max(p1[1], p2[1]) and p[0] >= min(p3[0], p4[0]) and p[0] <= max(p3[0], p4[0]) and p[1] >= min(p3[1], p4[1]) and p[1] <= max(p3[1], p4[1]):
+		if between(p[0], p1[0], p2[0]) and between(p[1], p1[1], p2[1]) and between(p[0], p3[0], p4[0]) and between(p[1], p3[1], p4[1]):
 			return p
 	return None
 
+# Checks if the first number is between the other two numbers.
+# Also returns true if all numbers are very close together to the point where they are essentially equal
+# (i.e., floating point approximation).
+def between(p, p1, p2):
+	if (abs(p1 - p2) <= EPSILON):
+		return abs(p - p2) <= EPSILON
+	else:
+		return p >= min(p1, p2) and p <= max(p1, p2)
 
 
 def rayTrace(p1, p2, line):
@@ -305,7 +313,10 @@ def reverseLine(line):
 def pointInsidePolygonLines(point, polygon):
 	count = 0
 	for l in polygon:
-		if rayTrace(point, (-10, SCREEN[1]/2.0), l) != None:
+		result = rayTrace(point, (-10, SCREEN[1]/2.0), l)
+		if result != None:
+			if between(result[0], point[0], point[0]) and between(result[1], point[1], point[1]):
+				return True
 			count = count + 1
 	return count%2 == 1
 
