@@ -25,17 +25,69 @@ from core import *
 
 # Creates the pathnetwork as a list of lines between all pathnodes that are traversable by the agent.
 def myBuildPathNetwork(pathnodes, world, agent = None):
-	lines = []
-	### YOUR CODE GOES BELOW HERE ###
-	
-	#getting world dimensions
-	x,y = world.getDimensions()
-	dimensions = (int(math.ceil(x/cellsize)), int(math.ceil(y/cellsize)))
+    lines = []
+    ### YOUR CODE GOES BELOW HERE ###
+    
+    #getting world dimensions
+    x,y = world.getDimensions()
+    # dimensions = (int(math.ceil(x/cellsize)), int(math.ceil(y/cellsize)))
 
-	obstacles = world.getObstacles()
+    obstacles = world.getObstacles()
 
-	for node in pathnodes:
-		for nextNode in pathnodes(node, len(pathnodes)):
-			tryLine = (node, nextNode)
-	### YOUR CODE GOES ABOVE HERE ###
-	return lines
+    # for each node in pathnodes
+    #     for each subsequent node in pathnodes
+
+    #         find the path between them. can it be traversed?
+    #         if yes then 
+    #         lines.add()
+    #         else
+    #         next 
+
+    for node in range(len(pathnodes)): #getting indexes
+        for nextNode in range(node +1, len(pathnodes)):
+            start = pathnodes[node]
+            end = pathnodes[nextNode]
+            tryLine = (start, end)
+            # print 'a tryline is the type '
+            # print type(tryLine)
+            print 'FOR LINE '
+            print tryLine
+
+            linesAllGood = True
+
+            for o in obstacles:
+                oPoints = o.getPoints()
+                oLines = o.getLines()
+                minD = 1000000000000000.0
+
+                if linesAllGood == False:
+                    break
+
+                for line in oLines: #checking if the lines of obstacle collide with the line between these two points
+                    # print type(line)
+                    # print line[0]
+                    # print type(line[0][0])
+                    if (calculateIntersectPoint(start, end, line[0], line[1]) != None): #there is collision
+                            linesAllGood = False
+                            break
+                if linesAllGood == False:
+                    break
+
+                for point in oPoints:
+                    # print 'trying this point'
+                    # print point
+                    # if (calculateIntersectPoint(point, point, tryLine[0], tryLine[1]) != None): #there is collision
+                    # if rayTrace(point, point, tryLine) != None:
+                    cD = minimumDistance(tryLine, point)
+                    if cD < minD:
+                        minD = cD
+                if minD < 20.0:
+                    linesAllGood = False
+                    print 'Min D ' + str(minD)
+                    break
+
+            if linesAllGood:
+                lines.append(tryLine)
+                            
+    ### YOUR CODE GOES ABOVE HERE ###
+    return lines
