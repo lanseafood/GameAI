@@ -81,7 +81,7 @@ def myBuildPathNetwork(pathnodes, world, agent = None):
                     cD = minimumDistance(tryLine, point)
                     if cD < minD:
                         minD = cD
-                if minD < 20.0:
+                if minD < 2*agent.getRadius():
                     linesAllGood = False
                     print 'Min D ' + str(minD)
                     break
