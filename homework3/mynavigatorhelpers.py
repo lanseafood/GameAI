@@ -51,11 +51,11 @@ def shortcutPath(source, dest, path, world, agent):
 					temp_path = path[0:i] + path[j:]
 					temp_d = getDistances(temp_path)
 					if temp_d < path_size:
-						print 'old path'
+						# print 'old path'
 						print shortest_path
 						path_size = temp_d
 						shortest_path = temp_path
-						print 'new path'
+						# print 'new path'
 						print shortest_path
 	### YOUR CODE GOES BELOW HERE ###
 		return shortest_path
@@ -100,17 +100,17 @@ def getDistances(path): #distance from source to dest from entire path
 def mySmooth(nav):
 	### YOUR CODE GOES BELOW HERE ###
 	path = nav.getPath()
-	print 'THIS IS THE PATH FOR MY SMOOTH' + str(path)
+	# print 'THIS IS THE PATH FOR MY SMOOTH' + str(path)
 	source = nav.getSource()
 	dest = nav.getDestination()
-	print 'trying to smooth'
+	# print 'trying to smooth'
 	# print source
 	# print dest
 	# print nav.world
 	if source != None and dest != None and canBridge(source, dest, nav.world.getLinesWithoutBorders(), nav.world.getPoints(), nav.agent.maxradius):
 		nav.setPath([])
 		nav.agent.moveToTarget(dest)
-		print 'RETURNED TRUE'
+		# print 'RETURNED TRUE'
 		return True
 	else:
 	### YOUR CODE GOES ABOVE HERE ###

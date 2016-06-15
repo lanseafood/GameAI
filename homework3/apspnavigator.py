@@ -62,7 +62,6 @@ class APSPNavigator(NavMeshNavigator):
             self.source = source
             self.destination = dest
             if clearShot(source, dest, self.world.getLinesWithoutBorders(), self.world.getPoints(), self.agent):
-                print 'THERES A CLEAR SHOT '
                 self.agent.moveToTarget(dest)
             else:
                 start = findClosestUnobstructed(source, self.pathnodes, self.world.getLines())
@@ -122,9 +121,9 @@ def APSP(nodes, edges):
         next[n] = {}
         dist[n] = {}
     ### YOUR CODE GOES BELOW HERE ###
-    print 'nothing in here right now'
+    # print 'nothing in here right now'
     # print next
-    print dist
+    # print dist
 
     #adding in distances for all the edges into dist matrix
     for e in edges:
@@ -134,9 +133,9 @@ def APSP(nodes, edges):
         dist[sink][source] = distance(source,sink)
         next[source][sink] = sink
         next[sink][source] = source
-    print 'added in all the distances'
+    # print 'added in all the distances'
     # print next
-    print dist
+    # print dist
 
     #checking if there is none, then it's a INF
     for f in nodes:
@@ -151,8 +150,8 @@ def APSP(nodes, edges):
                 if t not in next[f].keys():
                     next[f][t] = None
                     next[t][f] = None
-    print 'udpated for those that should be inf'
-    print dist
+    # print 'udpated for those that should be inf'
+    # print dist
 
     #updating the matrix
     for k in range(len(nodes)):
@@ -165,8 +164,8 @@ def APSP(nodes, edges):
                 if dist[start][intermediate] + dist[intermediate][end] < dist[start][end]:
                     dist[start][end] = dist[start][intermediate] + dist[intermediate][end]
                     next[start][end] = next[start][intermediate]
-    print 'updated to the best path distances'
-    print dist
+    # print 'updated to the best path distances'
+    # print dist
     # print next 
     #testing
     # print 'number of nodes reachable ' + str(len(nodes))
@@ -200,10 +199,10 @@ def clearShot(p1, p2, worldLines, worldPoints, agent):
         if min_d < minD:
             minD = min_d
     if minD < (agent.maxradius):
-        print minD
+        # print minD
         return False
     else:
-        print minD
+        # print minD
 # line = (p1,p2)
 # for i in xrange(len(worldPoints)): #doesn't collide with the obstacle corners
 #     for j in xrange(i+1, len(worldPoints)):
