@@ -51,7 +51,7 @@ def shortcutPath(source, dest, path, world, agent):
 					temp_path = path[0:i] + path[j:]
 					temp_d = getDistances(temp_path)
 					if temp_d < path_size:
-						# print 'old path'
+						# print 'old psath'
 						print shortest_path
 						path_size = temp_d
 						shortest_path = temp_path

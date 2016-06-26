@@ -1,4 +1,4 @@
-9'''
+'''
  * Copyright (c) 2014, 2015 Entertainment Intelligence Lab, Georgia Institute of Technology.
  * Originally developed by Mark Riedl.
  * Last edited by Mark Riedl 05/2015
